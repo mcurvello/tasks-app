@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   FlatList,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -9,18 +10,38 @@ import {
 } from "react-native";
 import Login from "./src/components/Login";
 import TaskList from "./src/components/TaskList";
+import firebase from "./src/services/firebaseConnection";
 
 export default function App() {
-  let tasks = [
-    { key: "1", nome: "Trabalhar durante fim de semana" },
-    { key: "2", nome: "Estudar" },
-  ];
-
   const [user, setUser] = useState(null);
+  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
 
   if (!user) {
     return <Login changeStatus={(user) => setUser(user)} />;
+  }
+
+  function handleAdd() {
+    if (newTask === "") {
+      return;
+    }
+    let tasks = firebase.database().ref("tarefas").child(user);
+    let chave = tasks.push().key;
+
+    tasks
+      .child(chave)
+      .set({
+        nome: newTask,
+      })
+      .then(() => {
+        const data = {
+          key: chave,
+          nome: newTask,
+        };
+        setTasks((oldTasks) => [...oldTasks, data]);
+      });
+    setNewTask("");
+    Keyboard.dismiss();
   }
 
   function handleDelete(key) {
@@ -40,7 +61,7 @@ export default function App() {
           value={newTask}
           onChangeText={(text) => setNewTask(text)}
         />
-        <TouchableOpacity style={styles.buttonAdd}>
+        <TouchableOpacity style={styles.buttonAdd} onPress={handleAdd}>
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
