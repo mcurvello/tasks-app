@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Keyboard,
@@ -16,6 +16,30 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
+
+  useEffect(() => {
+    function getUser() {
+      if (!user) {
+        return;
+      }
+      firebase
+        .database()
+        .ref("tarefas")
+        .child(user)
+        .once("value", (snapshot) => {
+          setTasks([]);
+          snapshot?.forEach((childItem) => {
+            let data = {
+              key: childItem.key,
+              nome: childItem.val().nome,
+            };
+            setTasks((oldTasks) => [...oldTasks, data]);
+          });
+        });
+    }
+
+    getUser();
+  }, [user]);
 
   if (!user) {
     return <Login changeStatus={(user) => setUser(user)} />;
