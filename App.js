@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Login from "./src/components/Login";
+import firebase from "firebase";
 
 export default function App() {
   const [user, setUser] = useState(null);
 
   if (!user) {
-    return <Login />;
+    return <Login changeStatus={(user) => setUser(user)} />;
   }
 
   return (

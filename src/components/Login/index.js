@@ -6,15 +6,43 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import firebase from "firebase";
+import firebase from "../../services/firebaseConnection";
 
-function handleLogin() {}
-
-export default function Login() {
+export default function Login({ changeStatus }) {
   const [type, setType] = useState("login");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  function handleLogin() {
+    if (type === "login") {
+      // Login do usuário
+      const user = firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then((user) => {
+          changeStatus(user.user.uid);
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Tem algum erro");
+          return;
+        });
+    } else {
+      // Cadastro do usuário
+      const user = firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then((user) => {
+          changeStatus(user.user.uid);
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Algo está errado");
+          return;
+        });
+    }
+  }
 
   return (
     <View style={styles.container}>
